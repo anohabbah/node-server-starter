@@ -1,24 +1,21 @@
-const morgan = require('morgan');
-const config = require('config');
-const logger = require('./winston.logging');
+import morgan from 'morgan';
+import config from 'config';
+import { Request, Response } from 'express';
 
-morgan.token('message', (_, res) => res.locals.errorMessage || '');
+import logger from './winston.logging';
+
+morgan.token('message', (_: Request, res: Response) => res.locals.errorMessage || '');
 
 const getIPFormat = () => (config.get('env') === 'production' ? ':remote-addr - ' : '');
 const successResponseFormat = `${getIPFormat()}:method :url :status - :response-time ms`;
 const errorResponseFormat = `${getIPFormat()}:method :url :status - :response-time ms - message: :message`;
 
-const successHandler = morgan(successResponseFormat, {
+export const successHandler = morgan(successResponseFormat, {
   skip: (_, res) => res.statusCode >= 400,
   stream: { write: (message) => logger.info(message.trim()) },
 });
 
-const errorHandler = morgan(errorResponseFormat, {
+export const errorHandler = morgan(errorResponseFormat, {
   skip: (_, res) => res.statusCode < 400,
   stream: { write: (message) => logger.error(message.trim()) },
 });
-
-module.exports = {
-  successHandler,
-  errorHandler,
-};
