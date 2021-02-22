@@ -4,7 +4,10 @@ import { Request, Response } from 'express';
 
 import logger from './winston.logging';
 
-morgan.token('message', (_: Request, res: Response) => res.locals.errorMessage || '');
+morgan.token(
+  'message',
+  (_: Request, res: Response<any, Record<string, string>>): string => res.locals.errorMessage || ''
+);
 
 const getIPFormat = () => (config.get('env') === 'production' ? ':remote-addr - ' : '');
 const successResponseFormat = `${getIPFormat()}:method :url :status - :response-time ms`;
